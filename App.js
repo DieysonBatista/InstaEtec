@@ -12,6 +12,7 @@ import ResetarSenhaScreen from "./screens/auth/ResetarSenhaScreen";
 import PostarScreen from "./screens/Postar";
 import MeuPerfilScreen from "./screens/MeuPerfil";
 
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 // Define the config
 const config = {
@@ -31,20 +32,22 @@ export default function App() {
   const autenticado = true;
 
   return (
-    <NavigationContainer>
-      {autenticado ? 
-        <Tab.Navigator useLegacyImplementation initialRouteName="Meu Perfil" screenOptions={{headerStyle: {backgroundColor: '#fff'}, headerShadowVisible:false, headerTintColor: '#1f2937'}}>
-          <Tab.Screen name="Timeline" component={TimelineScreen} />
-          <Tab.Screen name="Postar" component={PostarScreen} />
-          <Tab.Screen name="Meu Perfil" component={MeuPerfilScreen} />
-        </Tab.Navigator>
-        :
-        <Stack.Navigator initialRouteName="SignIn" screenOptions={{headerShown: false}}>
-          <Stack.Screen name="Autenticar" component={AutenticarScreen} />
-          <Stack.Screen name="Cadastro" component={CadastroScreen} />
-          <Stack.Screen name="ResetarSenha" component={ResetarSenhaScreen} />
-        </Stack.Navigator>
-      }
-    </NavigationContainer>
+    <SafeAreaProvider>
+      <NavigationContainer>
+        {autenticado ? 
+          <Tab.Navigator useLegacyImplementation initialRouteName="Meu Perfil" screenOptions={{ tabBarHideOnKeyboard: true, headerStyle: {backgroundColor: '#fff'}, headerShadowVisible:true, headerTintColor: '#1f2937'}}>
+            <Tab.Screen name="Timeline" component={TimelineScreen} />
+            <Tab.Screen name="Postar" component={PostarScreen} />
+            <Tab.Screen name="Meu Perfil" component={MeuPerfilScreen} />
+          </Tab.Navigator>
+          :
+          <Stack.Navigator initialRouteName="SignIn" screenOptions={{headerShown: false}}>
+            <Stack.Screen name="Autenticar" component={AutenticarScreen} />
+            <Stack.Screen name="Cadastro" component={CadastroScreen} />
+            <Stack.Screen name="ResetarSenha" component={ResetarSenhaScreen} />
+          </Stack.Navigator>
+        }
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }

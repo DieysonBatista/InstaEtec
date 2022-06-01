@@ -1,8 +1,12 @@
 import React from 'react';
 import { Box, Text, Heading, VStack, FormControl, Input, Link, Button, HStack, Center, NativeBaseProvider } from "native-base";
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const AutenticarScreen = ({navigation}) => {
   return (
+    <SafeAreaView
+      style={{ flex: 1, width: "100%"}}
+    >
   <NativeBaseProvider>
     <Center flex={1} px="3">
       <Center w="100%" >
@@ -55,7 +59,7 @@ const AutenticarScreen = ({navigation}) => {
         </Box>
       </Center>
     </Center>
-  </NativeBaseProvider>
+  </NativeBaseProvider></SafeAreaView>
 );
 }
 
