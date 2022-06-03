@@ -1,4 +1,5 @@
 import React from "react";
+import './config/firebase';
 
 
 import { NavigationContainer } from '@react-navigation/native';
@@ -11,8 +12,12 @@ import CadastroScreen from "./screens/auth/CadastroScreen";
 import ResetarSenhaScreen from "./screens/auth/ResetarSenhaScreen";
 import PostarScreen from "./screens/Postar";
 import MeuPerfilScreen from "./screens/MeuPerfil";
+import AlterarFotoScreen from "./screens/AlterarFoto"
 
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+import { useAuthentication } from './hooks/useAuthentication';
+
 
 // Define the config
 const config = {
@@ -28,8 +33,10 @@ const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  const { user } = useAuthentication();
 
-  const autenticado = true;
+  const autenticado = user ? true : false;
+  // const autenticado = false;
 
   return (
     <SafeAreaProvider>
@@ -39,6 +46,10 @@ export default function App() {
             <Tab.Screen name="Timeline" component={TimelineScreen} />
             <Tab.Screen name="Postar" component={PostarScreen} />
             <Tab.Screen name="Meu Perfil" component={MeuPerfilScreen} />
+            <Tab.Screen name="Alterar Foto" component={AlterarFotoScreen} options={{
+                  tabBarButton: () => null,
+                  tabBarVisible:false
+              }} />
           </Tab.Navigator>
           :
           <Stack.Navigator initialRouteName="SignIn" screenOptions={{headerShown: false}}>

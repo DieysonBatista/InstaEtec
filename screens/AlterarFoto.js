@@ -6,51 +6,19 @@ import { Platform, StyleSheet, Text, TouchableOpacity, ImageBackground, View, Ke
 
 import { Box, VStack, HStack, NativeBaseProvider, Image, Center, TextArea, Button} from 'native-base';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-import { getDatabase, ref, set, push } from "firebase/database";
 import { useAuthentication } from '../hooks/useAuthentication';
 
+import { getStorage, ref, uploadBytes } from "firebase/storage";
 
-import { getStorage, ref as refStorage, uploadBytes } from "firebase/storage";
+const storage = getStorage();
 
 let camera;
 
-const db = getDatabase();
-const storage = getStorage();
-
-const imageUrlToBase64 = async url => {
-  const response = await fetch(url);
-  const blob = await response.blob();
-  return new Promise((onSuccess, onError) => {
-    try {
-      const reader = new FileReader() ;
-      reader.onload = function(){ onSuccess(this.result) } ;
-      reader.readAsDataURL(blob) ;
-    } catch(e) {
-      onError(e);
-    }
-  });
-};
-
-const PostarScreen = ({navigation}) => {
-  const [location, setLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
-  const [descricao, setDescricao] = useState('');
-
+const AlterarFotoScreen = ({navigation}) => {
   const { user } = useAuthentication();
 
-  useEffect(() => {
-    (async () => {
-      let { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        setErrorMsg('Permissão negada para uso de GPS');
-        return;
-      }
-
-      let location = await Location.getCurrentPositionAsync({});
-      setLocation(location);
-    })();
-  }, []);
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   const [hasPermission, setHasPermission] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.back);
@@ -60,7 +28,6 @@ const PostarScreen = ({navigation}) => {
   useEffect(() => {
     (async () => {
       const { status } = await Camera.requestCameraPermissionsAsync();
-      const { status2 } = await Location.requestForegroundPermissionsAsync();
       setHasPermission(status === 'granted');
     })();
   }, []);
@@ -70,81 +37,31 @@ const PostarScreen = ({navigation}) => {
     setFoto(photo)
   }
 
+  const UploadFoto = async() => {
+    const storageRef = ref(storage, 'perfil/' + user.uid);
+    const response = await fetch(foto.uri);
+    const blob = await response.blob();
+
+    uploadBytes(storageRef, blob).then((snapshot) => {
+      Alert.alert("Foto alterada com sucesso!");
+      setFoto(null);
+      return navigation.navigate('Meu Perfil');
+    });
+  }
+
   if (hasPermission === null) {
     return <View />;
   }
   if (hasPermission === false) {
     return <Text>Sem Acesso a câmera</Text>;
   }
-
-  const publicar = async () => {
-    const fotoUrl = await imageUrlToBase64(foto.uri);
-    
-    const newPost = push(ref(db, 'timeline'));
-    const newPostId = newPost.key;
-    const newPost2 = ref(db, 'usuarios/' + user.uid + '/postagens/' + newPostId);
-    
-
-    set(newPost, {
-      descricao: descricao,
-      latitude: location?.coords?.latitude,
-      longitude: location?.coords?.longitude,
-      nome: user.displayName,
-      postagemId: newPostId,
-      userId: user.uid
-    });
-
-    set(newPost2, {
-      descricao: descricao,
-      latitude: location?.coords?.latitude,
-      longitude: location?.coords?.longitude,
-      nome: user.displayName,
-      postagemId: newPostId,
-      userId: user.uid
-    });
-    
-    UploadFoto(newPostId);
-    
-  }
-
-  const UploadFoto = async(postId) => {
-    const storageRef = refStorage(storage, 'postagens/' + postId);
-    const response = await fetch(foto.uri);
-    const blob = await response.blob();
-
-    uploadBytes(storageRef, blob).then((snapshot) => {
-      Alert.alert("Postagem publicada com sucesso!");
-      setMostrarFormulario(false);
-      setFoto(null);
-      setDescricao('');
-      return navigation.navigate('Timeline');
-    });
-  }
-
   return (
     <SafeAreaView
       style={{ flex: 1, width: "100%"}}
     >
       <NativeBaseProvider>
           <Box flex={1}>
-            {mostrarFormulario ? 
-                  <Box mt={5}>
-                    {/* <Center>
-                      <Image source={{uri: foto && foto?.uri}} alt="Alternate Text" size="2xl"/>
-                    </Center> */}
-                    <VStack mt={5} px={5} space={5}>
-                      {errorMsg != null ? <Text>{errorMsg}</Text> :               
-                        <>
-                          <Text key={"lat"}>Latitude: {location?.coords?.latitude}</Text>
-                          <Text key={"long"}>Longitude: {location?.coords?.longitude}</Text>
-                        </>
-                      }
-                      <TextArea h={100} placeholder="Descrição da foto" w="100%" maxW="450" onChangeText={setDescricao}/>
-                      <Button onPress={publicar}>Postar</Button>
-                    </VStack>
-                  </Box> 
-              : 
-              <>{foto == null ? <Camera ref={(r) => {camera = r}} style={styles.camera} type={type} ratio={"4:3"}>
+              {foto == null ? <Camera ref={(r) => {camera = r}} style={styles.camera} type={type} ratio={"4:3"}>
                     <Box flex={1} justifyContent="flex-end" pb={5} px={5} backgroundColor={"transparent"}>
                       <HStack width="100%" justifyContent="space-between" alignContent={"flex-end"} alignSelf="flex-end" backgroundColor={"transparent"}>
 
@@ -159,9 +76,7 @@ const PostarScreen = ({navigation}) => {
                       </HStack>
                     </Box>
                     
-              </Camera> : <CameraPreview  Foto={foto} Continuar={() => {setMostrarFormulario(true)}} TirarOutra={() => {setFoto(null)}}/> }
-              </>}
-              
+              </Camera> : <CameraPreview  Foto={foto} Continuar={UploadFoto} TirarOutra={() => {setFoto(null)}}/> }
           </Box>
       </NativeBaseProvider>
     </SafeAreaView>
@@ -268,4 +183,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PostarScreen;
+export default AlterarFotoScreen;

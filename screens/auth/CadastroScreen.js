@@ -1,8 +1,39 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { Box, Text, Heading, VStack, FormControl, Input, Link, Button, HStack, Center, NativeBaseProvider } from "native-base";
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { Alert } from 'react-native';
+
+const auth = getAuth();
+
 const CadastroScreen = ({navigation}) => {
+
+  const [nome, setNome] = useState('');
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+  const [confirmarSenha, setConfirmarSenha] = useState('');
+
+  const Cadastrar = async () => {
+    if (email === '' || senha === '') {
+      Alert.alert('E-mail e senha obrigatórios!');
+      return;
+    }
+    if (senha !== confirmarSenha) {
+      alert('Desculpe mas suas senhas não conferem.');
+      return;
+    }
+
+    try {
+      const {user} = await createUserWithEmailAndPassword(auth, email, senha);
+      await updateProfile(user, {
+        displayName: nome
+      }) 
+      navigation.navigate('Autenticar')
+    } catch (error) {
+      Alert.alert(error.message);
+    }
+  }
 
   return (
     <SafeAreaView
@@ -24,19 +55,23 @@ const CadastroScreen = ({navigation}) => {
               </Heading>
               <VStack space={3} mt="5">
                 <FormControl>
+                  <FormControl.Label>Nome</FormControl.Label>
+                  <Input name="name" value={nome} onChangeText={setNome} />
+                </FormControl>
+                <FormControl>
                   <FormControl.Label>Email</FormControl.Label>
-                  <Input />
+                  <Input value={email} onChangeText={setEmail} />
                 </FormControl>
                 <FormControl>
                   <FormControl.Label>Senha</FormControl.Label>
-                  <Input type="password" />
+                  <Input type="password" value={senha} onChangeText={setSenha} />
                 </FormControl>
                 <FormControl>
                   <FormControl.Label>Confirmação de Senha</FormControl.Label>
-                  <Input type="password" />
+                  <Input type="password" value={confirmarSenha} onChangeText={setConfirmarSenha} />
                 </FormControl>
 
-                <Button mt="2" colorScheme="indigo">
+                <Button mt="2" colorScheme="indigo" onPress={Cadastrar}>
                   Cadastrar-se
                 </Button>
                 <HStack mt="6" justifyContent="center">

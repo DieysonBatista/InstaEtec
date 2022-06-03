@@ -1,8 +1,30 @@
-import React from 'react';
-import { Box, Text, Heading, VStack, FormControl, Input, Link, Button, HStack, Center, NativeBaseProvider } from "native-base";
+import React, {useState} from 'react';
+import { Box, Text, Heading, VStack, FormControl, Input, Link, Button, HStack, Center, NativeBaseProvider, AlertDialog } from "native-base";
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
+import { Alert } from 'react-native';
+
+const auth = getAuth();
+
 const AutenticarScreen = ({navigation}) => {
+
+  const [email, setEmail] = useState('');
+  const [senha, setSenha] = useState('');
+
+  async function Autenticar() {
+    if (email === '' || senha === '') {
+      Alert.alert('E-mail e senha obrigatórios!');
+      return;
+    }
+
+    try {
+      await signInWithEmailAndPassword(auth, email, senha);
+    } catch (error) {
+      Alert.alert(error.message);
+    }
+  }
+
   return (
     <SafeAreaView
       style={{ flex: 1, width: "100%"}}
@@ -25,20 +47,20 @@ const AutenticarScreen = ({navigation}) => {
           <VStack space={3} mt="5">
             <FormControl>
               <FormControl.Label>Email</FormControl.Label>
-              <Input />
+              <Input value={email} onChangeText={setEmail} />
             </FormControl>
             <FormControl>
               <FormControl.Label>Senha</FormControl.Label>
-              <Input type="password" />
-              <Link _text={{
+              <Input type="password" value={senha} onChangeText={setSenha} />
+              {/* <Link _text={{
               fontSize: "xs",
               fontWeight: "500",
               color: "indigo.500"
             }} alignSelf="flex-end" mt="1" onPress={() => navigation.navigate('ResetarSenha')}>
                 Esqueceu sua senha?
-              </Link>
+              </Link> */}
             </FormControl>
-            <Button mt="2" colorScheme="indigo">
+            <Button mt="2" colorScheme="indigo" onPress={Autenticar}>
               Entrar
             </Button>
             <HStack mt="6" justifyContent="center">
