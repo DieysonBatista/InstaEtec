@@ -5,11 +5,11 @@ import {
     FlatList,
     Avatar, VStack, HStack,
     Heading, 
-    Divider, Button
+    Divider, Button, Text
   } from "native-base";
 
 import { getStorage, ref as refStorage, getDownloadURL } from "firebase/storage";
-import { getDatabase, ref, child, onValue } from "firebase/database";
+import { getDatabase, ref, child, get } from "firebase/database";
 import { getAuth, signOut } from "firebase/auth";
 
 import { useAuthentication } from '../hooks/useAuthentication';
@@ -20,25 +20,17 @@ const MeuPerfilScreen = ({navigation}) => {
   const { user } = useAuthentication();
   const [foto, setFoto] = useState('https://icon-library.com/images/no-profile-picture-icon/no-profile-picture-icon-14.jpg');
 
+  const [postagens, setPostagens] = useState([]);
+
   const storage = getStorage();
   const database = getDatabase();
   const auth = getAuth();
   
   useEffect(() => {
-    if(user)
-      getDownloadURL(refStorage(storage, 'perfil/' + user?.uid))
-        .then((url) => {
-          setFoto(url);
-        });
-  }, [user]);
-
-  
-  const [postagens, setPostagens] = useState([]);
-
-  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
       const puxarDados = async () => {
         const dbRef = ref(getDatabase());
-        onValue(child(dbRef, 'usuarios/' + user?.uid + '/postagens'), (snapshot) => {
+        get(child(dbRef, 'usuarios/' + user?.uid + '/postagens')).then(snapshot => {
           if (snapshot.exists()) {
             setPostagens(Object.entries(snapshot.val()).reverse());
           } else {
@@ -48,9 +40,27 @@ const MeuPerfilScreen = ({navigation}) => {
           console.error(error);
         });
       }
+
+      const baixarFotoPerfil = () => {
+        getDownloadURL(refStorage(storage, 'perfil/' + user?.uid))
+          .then((url) => {
+            setFoto(url);
+          }).catch((e) => {
+            setTimeout(baixarFotoPerfil, 3000);
+          });
+      }
   
-      puxarDados();
-    }, []);
+      if(user) baixarFotoPerfil();
+
+      if(user) puxarDados();
+    });
+
+    // Return the function to unsubscribe from the event so it gets removed on unmount
+    return unsubscribe;
+  }, [navigation, user]);
+
+  
+  
 
   
 
@@ -70,6 +80,7 @@ const MeuPerfilScreen = ({navigation}) => {
               </HStack>
               <Divider my={2}/>
               
+              {postagens && postagens.length < 1 && <Text>Nenhuma postagem para exibir</Text>}
               <FlatList numColumns={3} data={postagens} renderItem={({
                   item
                 }) => <MiniPostagemComponent postagemId={item[0]}/> } keyExtractor={item => item[0]} />

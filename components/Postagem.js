@@ -16,7 +16,7 @@ import {
 const PostagemComponent = ({dados}) => {
     const {userId, postagemId, nome, latitude, foto, longitude, descricao} = dados;
 
-    const [fotoPerfil, setFotoPerfil] = useState(null);
+    const [fotoPerfil, setFotoPerfil] = useState('https://icon-library.com/images/no-profile-picture-icon/no-profile-picture-icon-14.jpg');
     const [fotoPostagem, setFotoPostagem] = useState(null);
 
     useEffect(() => {
@@ -25,10 +25,16 @@ const PostagemComponent = ({dados}) => {
             setFotoPerfil(url);
         });
 
-        getDownloadURL(ref(storage, 'postagens/' + postagemId))
-        .then((url) => {
-            setFotoPostagem(url);
-        });
+        const DownloadFotoPostagem = () => {
+             getDownloadURL(ref(storage, 'postagens/' + postagemId))
+                .then((url) => {
+                    setFotoPostagem(url);
+                }).catch(() => {
+                    setTimeout(DownloadFotoPostagem, 3000);
+                });
+            }
+        
+        DownloadFotoPostagem();
       }, []);
 
     return (

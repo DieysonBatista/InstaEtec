@@ -19,6 +19,11 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useAuthentication } from './hooks/useAuthentication';
 
 
+import { LogBox } from 'react-native';
+LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
+LogBox.ignoreAllLogs();
+
+
 // Define the config
 const config = {
   useSystemColorMode: false,

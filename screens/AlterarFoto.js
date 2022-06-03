@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import * as Location from 'expo-location';
 import { Camera } from 'expo-camera';
 
-import { Platform, StyleSheet, Text, TouchableOpacity, ImageBackground, View, KeyboardAvoidingView, Alert } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, ImageBackground, View, Alert } from 'react-native';
 
-import { Box, VStack, HStack, NativeBaseProvider, Image, Center, TextArea, Button} from 'native-base';
+import { Box, HStack, NativeBaseProvider } from 'native-base';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuthentication } from '../hooks/useAuthentication';
 
@@ -19,13 +18,9 @@ let camera;
 const AlterarFotoScreen = ({navigation}) => {
   const { user } = useAuthentication();
 
-  const [location, setLocation] = useState(null);
-  const [errorMsg, setErrorMsg] = useState(null);
-
   const [hasPermission, setHasPermission] = useState(null);
-  const [type, setType] = useState(Camera.Constants.Type.back);
+  const [type, setType] = useState(Camera.Constants.Type.front);
   const [foto, setFoto] = useState(null);
-  const [mostrarFormulario, setMostrarFormulario] = useState(false);
 
   const iniciar = useIsFocused();
 
@@ -65,7 +60,7 @@ const AlterarFotoScreen = ({navigation}) => {
     >
       <NativeBaseProvider>
           <Box flex={1}>
-              {foto == null && iniciar ? <Camera ref={(r) => {camera = r}} style={styles.camera} type={type} ratio={"4:3"}>
+              {foto == null && iniciar ? <Camera ref={(r) => {camera = r}} style={styles.camera} type={type} ratio={"1:1"} pictureSize={"1080x1080"}>
                     <Box flex={1} justifyContent="flex-end" pb={5} px={5} backgroundColor={"transparent"}>
                       <HStack width="100%" justifyContent="space-between" alignContent={"flex-end"} alignSelf="flex-end" backgroundColor={"transparent"}>
 

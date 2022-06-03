@@ -24,10 +24,15 @@ const PostarScreen = ({navigation}) => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [descricao, setDescricao] = useState('');
+  const [loading, setLoading] = useState(false);
   
   const iniciar = useIsFocused();
 
   const { user } = useAuthentication();
+
+  // const pegarSizes = async () => {
+  //   console.log(await camera.getAvailablePictureSizesAsync("1:1"));
+  // }
 
   useEffect(() => {
     (async () => {
@@ -68,6 +73,8 @@ const PostarScreen = ({navigation}) => {
   }
 
   const publicar = async () => {    
+    console.log('clicou');
+    setLoading(true);
     const newPost = push(ref(db, 'timeline'));
     const newPostId = newPost.key;
     const newPost2 = ref(db, 'usuarios/' + user.uid + '/postagens/' + newPostId);
@@ -105,6 +112,7 @@ const PostarScreen = ({navigation}) => {
       setMostrarFormulario(false);
       setFoto(null);
       setDescricao('');
+      setLoading(false);
       return navigation.navigate('Timeline');
     });
   }
@@ -128,14 +136,14 @@ const PostarScreen = ({navigation}) => {
                         </>
                       }
                       <TextArea h={100} placeholder="Descrição da foto" w="100%" maxW="450" onChangeText={setDescricao}/>
-                      <Button onPress={publicar}>Postar</Button>
+                      <Button disabled={loading} onPress={publicar}>{loading ? 'Carregando' : 'Postar'}</Button>
                     </VStack>
                   </Box> 
               : 
               <>
                 {foto == null && iniciar ? 
                   
-                    <Camera ref={(r) => {camera = r}} style={styles.camera} type={type} ratio={"4:3"}>
+                    <Camera ref={(r) => {camera = r}} style={styles.camera} type={type} ratio={"1:1"} pictureSize={"1080x1080"}>
                       <Box flex={1} justifyContent="flex-end" pb={5} px={5} backgroundColor={"transparent"}>
                         <HStack width="100%" justifyContent="space-between" alignContent={"flex-end"} alignSelf="flex-end" backgroundColor={"transparent"}>
 

@@ -11,10 +11,16 @@ const MiniPostagemComponent = ({postagemId}) => {
     const [fotoPostagem, setFotoPostagem] = useState(null);
 
     useEffect(() => {
-        getDownloadURL(ref(storage, 'postagens/' + postagemId))
-        .then((url) => {
-            setFotoPostagem(url);
-        });
+        const baixarFoto = () => {
+          getDownloadURL(ref(storage, 'postagens/' + postagemId))
+          .then((url) => {
+              setFotoPostagem(url);
+          }).catch(e => {
+            setTimeout(baixarFoto, 3000);
+          });
+        }
+
+        baixarFoto();
       }, []);
 
     return (
