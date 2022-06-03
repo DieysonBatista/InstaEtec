@@ -40,8 +40,9 @@ const PostagemComponent = ({dados}) => {
                     AJ
                 </Avatar>
                 <Box my={3}>
-                <Heading size="sm">{nome}</Heading>
-                <Text>Latitude: {latitude}, Longitude: {longitude}</Text>
+                    <Heading size="sm">{nome}</Heading>
+                    <Text>Latitude: {latitude}</Text>
+                    <Text>Longitude: {longitude}</Text>
                 </Box>
             </HStack>
             <Image source={{uri: fotoPostagem}} alt="Alternate Text" size="2xl" flex={1} width="100%"/>

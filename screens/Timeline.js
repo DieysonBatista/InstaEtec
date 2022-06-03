@@ -6,7 +6,7 @@ import {
   Avatar, HStack, VStack, Text, Spacer,  Center 
 } from "native-base";
 
-import { getDatabase, ref, child, get } from "firebase/database";
+import { getDatabase, ref, child, onValue } from "firebase/database";
 
 import NativeBaseIcon from "../components/NativeBaseIcon";
 import { Platform } from "react-native";
@@ -19,25 +19,20 @@ const TimelineScreen = ({navigation}) => {
   const [postagens, setPostagens] = useState([]);
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
+    
       const puxarDados = async () => {
         const dbRef = ref(getDatabase());
-        get(child(dbRef, `timeline`)).then((snapshot) => {
+        onValue(child(dbRef, `timeline`), (snapshot) => {
           if (snapshot.exists()) {
             setPostagens(Object.entries(snapshot.val()).reverse());
           } else {
             console.log("No data available");
           }
-        }).catch((error) => {
-          console.error(error);
         });
       }
   
       puxarDados();
-    });
-
-    return unsubscribe;
-  }, [navigation]);
+    }, []);
 
   return (
     <NativeBaseProvider>

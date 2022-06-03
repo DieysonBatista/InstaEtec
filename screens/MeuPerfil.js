@@ -9,7 +9,7 @@ import {
   } from "native-base";
 
 import { getStorage, ref as refStorage, getDownloadURL } from "firebase/storage";
-import { getDatabase, ref, child, get } from "firebase/database";
+import { getDatabase, ref, child, onValue } from "firebase/database";
 import { getAuth, signOut } from "firebase/auth";
 
 import { useAuthentication } from '../hooks/useAuthentication';
@@ -36,10 +36,9 @@ const MeuPerfilScreen = ({navigation}) => {
   const [postagens, setPostagens] = useState([]);
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
       const puxarDados = async () => {
         const dbRef = ref(getDatabase());
-        get(child(dbRef, 'usuarios/' + user?.uid + '/postagens')).then((snapshot) => {
+        onValue(child(dbRef, 'usuarios/' + user?.uid + '/postagens'), (snapshot) => {
           if (snapshot.exists()) {
             setPostagens(Object.entries(snapshot.val()).reverse());
           } else {
@@ -51,10 +50,7 @@ const MeuPerfilScreen = ({navigation}) => {
       }
   
       puxarDados();
-    });
-
-    return unsubscribe;
-  }, [navigation, user]);
+    }, []);
 
   
 

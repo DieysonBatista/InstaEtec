@@ -13,29 +13,19 @@ import { useAuthentication } from '../hooks/useAuthentication';
 
 import { getStorage, ref as refStorage, uploadBytes } from "firebase/storage";
 
+import { useIsFocused } from '@react-navigation/native';
+
 let camera;
 
 const db = getDatabase();
 const storage = getStorage();
 
-const imageUrlToBase64 = async url => {
-  const response = await fetch(url);
-  const blob = await response.blob();
-  return new Promise((onSuccess, onError) => {
-    try {
-      const reader = new FileReader() ;
-      reader.onload = function(){ onSuccess(this.result) } ;
-      reader.readAsDataURL(blob) ;
-    } catch(e) {
-      onError(e);
-    }
-  });
-};
-
 const PostarScreen = ({navigation}) => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [descricao, setDescricao] = useState('');
+  
+  const iniciar = useIsFocused();
 
   const { user } = useAuthentication();
 
@@ -77,9 +67,7 @@ const PostarScreen = ({navigation}) => {
     return <Text>Sem Acesso a câmera</Text>;
   }
 
-  const publicar = async () => {
-    const fotoUrl = await imageUrlToBase64(foto.uri);
-    
+  const publicar = async () => {    
     const newPost = push(ref(db, 'timeline'));
     const newPostId = newPost.key;
     const newPost2 = ref(db, 'usuarios/' + user.uid + '/postagens/' + newPostId);
@@ -144,22 +132,27 @@ const PostarScreen = ({navigation}) => {
                     </VStack>
                   </Box> 
               : 
-              <>{foto == null ? <Camera ref={(r) => {camera = r}} style={styles.camera} type={type} ratio={"4:3"}>
-                    <Box flex={1} justifyContent="flex-end" pb={5} px={5} backgroundColor={"transparent"}>
-                      <HStack width="100%" justifyContent="space-between" alignContent={"flex-end"} alignSelf="flex-end" backgroundColor={"transparent"}>
+              <>
+                {foto == null && iniciar ? 
+                  
+                    <Camera ref={(r) => {camera = r}} style={styles.camera} type={type} ratio={"4:3"}>
+                      <Box flex={1} justifyContent="flex-end" pb={5} px={5} backgroundColor={"transparent"}>
+                        <HStack width="100%" justifyContent="space-between" alignContent={"flex-end"} alignSelf="flex-end" backgroundColor={"transparent"}>
 
-                        <Text onPress={() => {
-                            setType(
-                              type === Camera.Constants.Type.back
-                                ? Camera.Constants.Type.front
-                                : Camera.Constants.Type.back
-                            );
-                          }} style={styles.text}>Flip</Text>
-                        <Text style={styles.text} onPress={() => tirarFoto()}>Tirar Foto</Text>
-                      </HStack>
-                    </Box>
-                    
-              </Camera> : <CameraPreview  Foto={foto} Continuar={() => {setMostrarFormulario(true)}} TirarOutra={() => {setFoto(null)}}/> }
+                          <Text onPress={() => {
+                              setType(
+                                type === Camera.Constants.Type.back
+                                  ? Camera.Constants.Type.front
+                                  : Camera.Constants.Type.back
+                              );
+                            }} style={styles.text}>Flip</Text>
+                          <Text style={styles.text} onPress={() => tirarFoto()}>Tirar Foto</Text>
+                        </HStack>
+                      </Box>
+                    </Camera> 
+                    : 
+                    <CameraPreview  Foto={foto} Continuar={() => {setMostrarFormulario(true)}} TirarOutra={() => {setFoto(null)}}/> 
+                  }
               </>}
               
           </Box>

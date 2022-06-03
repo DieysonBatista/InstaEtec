@@ -10,6 +10,8 @@ import { useAuthentication } from '../hooks/useAuthentication';
 
 import { getStorage, ref, uploadBytes } from "firebase/storage";
 
+import { useIsFocused } from '@react-navigation/native';
+
 const storage = getStorage();
 
 let camera;
@@ -24,6 +26,8 @@ const AlterarFotoScreen = ({navigation}) => {
   const [type, setType] = useState(Camera.Constants.Type.back);
   const [foto, setFoto] = useState(null);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
+
+  const iniciar = useIsFocused();
 
   useEffect(() => {
     (async () => {
@@ -61,7 +65,7 @@ const AlterarFotoScreen = ({navigation}) => {
     >
       <NativeBaseProvider>
           <Box flex={1}>
-              {foto == null ? <Camera ref={(r) => {camera = r}} style={styles.camera} type={type} ratio={"4:3"}>
+              {foto == null && iniciar ? <Camera ref={(r) => {camera = r}} style={styles.camera} type={type} ratio={"4:3"}>
                     <Box flex={1} justifyContent="flex-end" pb={5} px={5} backgroundColor={"transparent"}>
                       <HStack width="100%" justifyContent="space-between" alignContent={"flex-end"} alignSelf="flex-end" backgroundColor={"transparent"}>
 
